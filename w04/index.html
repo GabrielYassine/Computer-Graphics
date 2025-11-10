@@ -2,16 +2,11 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>W04P5 – Phong (per-fragment) + sliders</title>
+    <title>Worksheet 4</title>
+    <link rel="stylesheet" href="styles.css">
     <script type="text/javascript" src="../util/MV.js"></script>
-    <script defer src="main.js"></script>
-    <style>
-      body { font-family: system-ui, sans-serif; color:#222; }
-      .row { margin-top: 8px; display:flex; align-items:center; gap:8px; }
-      label { min-width: 110px; }
-      input[type="range"] { width: 220px; }
-      .val { width: 4ch; text-align:right; display:inline-block; }
-    </style>
+    <script type="text/javascript" src="main.js"></script>
+    <script id="wgsl" type="x-shader" src="shader.wgsl"></script>
   </head>
   <body>
     <canvas id="my-canvas" width="640" height="480"></canvas>

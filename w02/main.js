@@ -9,7 +9,7 @@ async function main() {
   if (!adapter) return;
   const device = await adapter.requestDevice();
 
-  const canvas = document.getElementById("c");
+  const canvas = document.getElementById("my-canvas");
   const context = canvas.getContext("webgpu");
   const format = gpu.getPreferredCanvasFormat();
   context.configure({ device, format });

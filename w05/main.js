@@ -1,10 +1,11 @@
 "use strict";
 
+window.onload = () => main();
+
 // ---------- helpers ----------
 function fail(msg){ throw new Error(msg); }
 function toFloat32(arr){ return (arr instanceof Float32Array) ? arr : new Float32Array(arr); }
 function toUint32(arr){ return (arr instanceof Uint32Array) ? arr : new Uint32Array(arr); }
-
 
 function makeMVP(canvas, yawDeg) {
   const eye = vec3(0, 1.5, 4);
@@ -17,21 +18,19 @@ function makeMVP(canvas, yawDeg) {
   return mult(P, mult(V, M));
 }
 
-async function loadWGSL(dev, url){
-  const txt = await (await fetch(url)).text();
-  return dev.createShaderModule({code: txt});
-}
+async function main() {
+  const gpu = navigator.gpu;
+  if (!gpu) return;
+  const adapter = await gpu.requestAdapter();
+  if (!adapter) return;
+  const device = await adapter.requestDevice();
+  
+  const canvas = document.getElementById('my-canvas');
+  const context = canvas.getContext('webgpu');
+  const format = gpu.getPreferredCanvasFormat();
+  context.configure({ device, format });
 
-window.addEventListener('load', async () => {
-  const canvas = document.getElementById('gpu-canvas');
-  const spin = document.getElementById('spin');
-
-  if (!('gpu' in navigator)) fail('WebGPU not supported');
-  const adapter = await navigator.gpu.requestAdapter();
-  const device  = await adapter.requestDevice();
-  const ctx     = canvas.getContext('webgpu');
-  const format  = navigator.gpu.getPreferredCanvasFormat();
-  ctx.configure({device, format, alphaMode:'opaque'});
+  const orbit = document.getElementById('orbit');
 
   const info = await readOBJFile('pacman.obj', 1.0, false);
   if (!info) fail('Could not load OBJ (check paths / CORS)');
@@ -53,7 +52,8 @@ window.addEventListener('load', async () => {
   const idxBuf = device.createBuffer({size: idxData.byteLength, usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST});
   device.queue.writeBuffer(idxBuf, 0, idxData);
 
-  const shader = await loadWGSL(device, 'shader.wgsl');
+  const shaderCode = await (await fetch("shader.wgsl")).text();
+  const shader = device.createShaderModule({ code: shaderCode });
 
   const vtxStride = 4 * 4;
   const pipeline = device.createRenderPipeline({
@@ -87,10 +87,11 @@ window.addEventListener('load', async () => {
   }
   let depthTex = makeDepth();
 
+  let yaw = 0;
   function frame(){
     if (depthTex.width !== canvas.width || depthTex.height !== canvas.height) depthTex = makeDepth();
 
-    const yaw = Number(spin.value);
+    if (orbit.checked) yaw += 0.5;
     const mvp = makeMVP(canvas, yaw);
 
     // eye must match the one used in makeMVP()
@@ -110,7 +111,7 @@ window.addEventListener('load', async () => {
     const encoder = device.createCommandEncoder();
     const pass = encoder.beginRenderPass({
       colorAttachments: [{
-        view: ctx.getCurrentTexture().createView(),
+        view: context.getCurrentTexture().createView(),
         loadOp: 'clear',
         clearValue: { r: 0.3921, g: 0.5843, b: 0.9294, a: 1 },
         storeOp: 'store'
@@ -134,4 +135,4 @@ window.addEventListener('load', async () => {
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-});
+}

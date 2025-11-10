@@ -1,0 +1,30 @@
+body {
+  font-family: system-ui, sans-serif;
+  color: #222;
+  margin: 0;
+}
+
+canvas {
+  display: block;
+}
+
+.row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+label {
+  min-width: 110px;
+}
+
+input[type="range"] {
+  width: 220px;
+}
+
+.val {
+  width: 4ch;
+  text-align: right;
+  display: inline-block;
+}

@@ -1,0 +1,39 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #111;
+  color: #ddd;
+  font-family: sans-serif;
+}
+
+canvas {
+  display: block;
+  width: 960px;
+  height: 540px;
+  margin: 8px;
+  border: 1px solid #333;
+}
+
+#ui {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+  align-items: center;
+}
+
+#ui label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+select,
+input {
+  background: #222;
+  color: #ddd;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 3px 6px;
+}
