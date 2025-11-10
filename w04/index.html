@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>W04P5 – Phong (per-fragment) + sliders</title>
+    <script type="text/javascript" src="../util/MV.js"></script>
+    <script defer src="main.js"></script>
+    <style>
+      body { font-family: system-ui, sans-serif; color:#222; }
+      .row { margin-top: 8px; display:flex; align-items:center; gap:8px; }
+      label { min-width: 110px; }
+      input[type="range"] { width: 220px; }
+      .val { width: 4ch; text-align:right; display:inline-block; }
+    </style>
+  </head>
+  <body>
+    <canvas id="my-canvas" width="640" height="480"></canvas>
+
+    <div class="row">
+      <button id="subDec">− Subdivide</button>
+      <span id="level">Level: 0</span>
+      <button id="subInc">+ Subdivide</button>
+      <label style="margin-left:1rem">
+        <input type="checkbox" id="orbitToggle" checked />
+        Orbit camera
+      </label>
+    </div>
+
+    <div class="row"><strong>Material</strong></div>
+    <div class="row">
+      <label for="kd">kd (diffuse)</label>
+      <input id="kd" type="range" min="0" max="1" step="0.01" value="1" />
+      <span class="val" id="kdVal">1</span>
+    </div>
+    <div class="row">
+      <label for="ks">ks (specular)</label>
+      <input id="ks" type="range" min="0" max="1" step="0.01" value="0.3" />
+      <span class="val" id="ksVal">0.3</span>
+    </div>
+    <div class="row">
+      <label for="shin">s (shininess)</label>
+      <input id="shin" type="range" min="1" max="200" step="1" value="32" />
+      <span class="val" id="shinVal">32</span>
+    </div>
+
+    <div class="row"><strong>Light</strong></div>
+    <div class="row">
+      <label for="Le">Le (emission)</label>
+      <input id="Le" type="range" min="0" max="5" step="0.01" value="1" />
+      <span class="val" id="LeVal">1</span>
+    </div>
+    <div class="row">
+      <label for="La">La (ambient)</label>
+      <input id="La" type="range" min="0" max="1" step="0.01" value="0.05" />
+      <span class="val" id="LaVal">0.05</span>
+    </div>
+  </body>
+</html>

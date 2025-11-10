@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Worksheet 2</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="../util/MV.js"></script>
+  <script defer src="main.js"></script>
+</head>
+<body>
+  <div class="ui">
+    <button id="modePoint" class="active">Point</button>
+    <button id="modeTriangle">Triangle</button>
+    <button id="modeCircle">Circle</button>
+    <label>Draw color:
+      <select id="drawColor">
+        <option>Black</option>
+        <option>Red</option>
+        <option>Yellow</option>
+        <option>Green</option>
+        <option>Blue</option>
+        <option>Magenta</option>
+        <option>Cyan</option>
+      </select>
+    </label>
+    <label>Clear to:
+      <select id="clearColor">
+        <option>Black</option>
+        <option>Red</option>
+        <option>Yellow</option>
+        <option>Green</option>
+        <option>Blue</option>
+        <option>Magenta</option>
+        <option>Cyan</option>
+        <option selected>Cornflower</option>
+      </select>
+    </label>
+    <button id="clearBtn">Clear</button>
+  </div>
+  <canvas id="c" width="500" height="500"></canvas>
+</body>
+</html>
