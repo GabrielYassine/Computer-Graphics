@@ -1,7 +1,6 @@
-// UBO: MVP + visibility factor (x component of vis)
 struct UBO {
-  mvp : mat4x4f,   // 64 bytes
-  vis : vec4f,     // 16 bytes (use vis.x)
+  mvp : mat4x4f,   // 64
+  vis : vec4f,     // vis.x = color multiplier, vis.y = output alpha
 };
 @group(0) @binding(0) var<uniform> U : UBO;
 @group(0) @binding(1) var samp : sampler;
@@ -27,6 +26,7 @@ fn vs_main(i : VSIn) -> VSOut {
 @fragment
 fn fs_main(i : VSOut) -> @location(0) vec4f {
   let base = textureSample(tex, samp, i.uv);
-  // visibility: 1.0 → show texture; 0.0 → black (shadow)
-  return base * U.vis.x;
+  let rgb  = base.rgb * U.vis.x;   // 1 for normal, 0 for black shadow
+  let a    = U.vis.y;              // 1 for normal, 0.6 for shadow
+  return vec4f(rgb, a);
 }
