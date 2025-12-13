@@ -101,12 +101,12 @@ async function main(){
 
   // Cubemap (environment)
   const faces = [
-    'textures/cm_left.png',
-    'textures/cm_right.png',
-    'textures/cm_bottom.png',
-    'textures/cm_top.png',
-    'textures/cm_back.png',
-    'textures/cm_front.png'
+    '../models-images/textures/cm_left.png',
+    '../models-images/textures/cm_right.png',
+    '../models-images/textures/cm_bottom.png',
+    '../models-images/textures/cm_top.png',
+    '../models-images/textures/cm_back.png',
+    '../models-images/textures/cm_front.png'
   ];
   const imgs = await Promise.all(faces.map(loadImageData));
   const W = imgs[0].w, H = imgs[0].h;
@@ -125,7 +125,7 @@ async function main(){
   }
 
   // Normal map (textures/normalmap.png)
-  const nm = await loadImageData('textures/normalmap.png');
+  const nm = await loadImageData('../models-images/textures/normalmap.png');
   const normalTex = device.createTexture({
     size:[nm.w, nm.h, 1],
     format:'rgba8unorm',

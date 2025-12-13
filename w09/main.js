@@ -78,7 +78,7 @@ async function main(){
   const gIdxBuf = makeIBuf(groundIdx);
 
   // ---------- Ground texture ----------
-  const img = await loadImageData("xamp23.png");
+  const img = await loadImageData("../models-images/xamp23.png");
   const texGround = device.createTexture({
     size: [img.w, img.h],
     format: "rgba8unorm",
@@ -99,7 +99,7 @@ async function main(){
   });
 
   // ---------- Load teapot OBJ ----------
-  const teapotInfo = await readOBJFile("teapot.obj", 1.0, false);
+  const teapotInfo = await readOBJFile("../models-images/teapot.obj", 1.0, false);
   if (!teapotInfo) {
     alert("Failed to load teapot.obj");
     return;

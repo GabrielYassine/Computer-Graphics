@@ -75,7 +75,7 @@ async function main(){
   const bPosBuf = makeVBuf(bPos),     bUVBuf = makeVBuf(bUV),       bIdxBuf = makeIBuf(bIdx);
 
   // textures
-  const img = await loadImageData("xamp23.png");
+  const img = await loadImageData("../models-images/xamp23.png");
   const texGround = device.createTexture({ size:[img.w,img.h], format:"rgba8unorm", usage:GPUTextureUsage.TEXTURE_BINDING|GPUTextureUsage.COPY_DST });
   device.queue.writeTexture({texture:texGround}, img.data, {bytesPerRow:img.w*4}, [img.w,img.h,1]);
 

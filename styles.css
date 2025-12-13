@@ -1,0 +1,80 @@
+/* Root styles.css - consolidated from per-week styles
+   Sections are annotated with original source comments. */
+
+/* Default dark theme (from w06/w07) */
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #111;
+  color: #ddd;
+  font-family: sans-serif;
+}
+
+/* Light theme override (for w04) */
+body.light {
+  font-family: system-ui, sans-serif;
+  color: #222;
+  background: #fff;
+}
+
+/* Canvas defaults - do not force width/height so pages can set attributes */
+canvas {
+  display: block;
+  margin: 8px;
+  border: 1px solid #333;
+}
+
+/* UI containers */
+#ui, .ui {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+  align-items: center;
+}
+
+#wrap {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px;
+}
+
+/* Labels, inputs */
+#ui label, #ui label * {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+select,
+input,
+button {
+  background: #222;
+  color: #ddd;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
+button:hover { background: #2a3550; }
+button.active { background: #3a4570; border-color:#4a5580; color:#fff; }
+
+/* Rows + small helpers (from w04) */
+.row { margin-top: 8px; display:flex; align-items:center; gap:8px; }
+input[type="range"] { width: 220px; }
+.val { width:4ch; text-align:right; display:inline-block; }
+
+/* Specific small styling used inline in some pages */
+small { opacity: 0.7; margin-top: 8px; display: block; }
+
+/* Page-specific tweaks (keep them non-invasive) */
+/* w05 used a different canvas size; its HTML attribute will take precedence. */
+
+/* End of consolidated stylesheet */

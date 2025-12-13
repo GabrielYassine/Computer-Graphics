@@ -32,7 +32,7 @@ async function main() {
 
   const orbit = document.getElementById('orbit');
 
-  const info = await readOBJFile('pacman.obj', 1.0, false);
+  const info = await readOBJFile('../models-images/pacman.obj', 1.0, false);
   if (!info) fail('Could not load OBJ (check paths / CORS)');
 
   const posData = toFloat32(info.vertices);
