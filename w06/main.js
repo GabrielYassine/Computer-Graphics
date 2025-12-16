@@ -172,7 +172,7 @@ async function main() {
 
   // Sphere: load earth.jpg and build mipmaps
   const earthImg = new Image();
-  earthImg.src = 'earth.jpg';
+  earthImg.src = '../models-images/earth.jpg';
   await earthImg.decode();
 
   const earthW = earthImg.width, earthH = earthImg.height;

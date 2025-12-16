@@ -4,12 +4,12 @@
 window.onload = () => main();
 
 // --- Projection / View helpers ------------------------------------------
-function makeProjectionView(canvas, camera){
+function makeProjectionView(canvas){
   const aspect = canvas.width / canvas.height;
   const P = perspective(65, aspect, 0.1, 100);
-  const eye = camera.getEye();
-  const at = camera.lookAt;
-  const up = camera.getUp();
+  const eye = vec3(0, 0.5, 1);
+  const at = vec3(0, 0, -3);
+  const up = vec3(0, 1, 0);
   const V = lookAt(eye, at, up);
   return { P, V, eye, at, up };
 }
@@ -48,151 +48,6 @@ function modifyProjectionMatrix(clipplane, projection) {
   return oblique;
 }
 
-// --- Virtual Trackball helpers ------------------------------------------
-function mapToSphere(x, y, width, height) {
-  // Map screen coordinates to [-1, 1]
-  const nx = (2.0 * x) / width - 1.0;
-  const ny = 1.0 - (2.0 * y) / height;
-  
-  // Project to sphere/hyperbola
-  const r = Math.sqrt(nx * nx + ny * ny);
-  let z;
-  
-  if (r < 0.707) {
-    // Inside sphere
-    z = Math.sqrt(1.0 - r * r);
-  } else {
-    // Outside sphere, use hyperbolic sheet
-    z = 0.5 / r;
-  }
-  
-  // Normalize the result
-  const len = Math.sqrt(nx * nx + ny * ny + z * z);
-  return vec3(nx / len, ny / len, z / len);
-}
-
-// --- Mouse event handlers -----------------------------------------------
-function setupMouseControls(canvas, camera, mouse, spinning) {
-  canvas.addEventListener('mousedown', (e) => {
-    mouse.isDragging = true;
-    mouse.lastX = e.offsetX;
-    mouse.lastY = e.offsetY;
-    mouse.lastMoveTime = Date.now();
-    
-    // Stop any active spinning
-    spinning.active = false;
-    spinning.velocity.setIdentity();
-    
-    // Determine interaction mode based on mouse button
-    if (e.button === 0) {
-      // Left button: Orbit
-      mouse.dragMode = 'orbit';
-      mouse.lastSpherePos = mapToSphere(e.offsetX, e.offsetY, canvas.width, canvas.height);
-      canvas.style.cursor = 'grabbing';
-    } else if (e.button === 1) {
-      // Middle button: Pan
-      e.preventDefault();
-      mouse.dragMode = 'pan';
-      canvas.style.cursor = 'move';
-    } else if (e.button === 2) {
-      // Right button: Dolly (zoom)
-      mouse.dragMode = 'dolly';
-      canvas.style.cursor = 'ns-resize';
-    }
-  });
-
-  canvas.addEventListener('mousemove', (e) => {
-    if (!mouse.isDragging) return;
-
-    const deltaX = e.offsetX - mouse.lastX;
-    const deltaY = e.offsetY - mouse.lastY;
-    
-    mouse.lastMoveTime = Date.now();
-
-    if (mouse.dragMode === 'orbit') {
-      const currentSpherePos = mapToSphere(e.offsetX, e.offsetY, canvas.width, canvas.height);
-      
-      const rotQuat = new Quaternion();
-      rotQuat.make_rot_vec2vec(mouse.lastSpherePos, currentSpherePos);
-      
-      const alpha = 0.5;
-      const q_old = spinning.velocity.elements;
-      const q_new = rotQuat.elements;
-      
-      q_old[0] = q_old[0] * (1 - alpha) + q_new[0] * alpha;
-      q_old[1] = q_old[1] * (1 - alpha) + q_new[1] * alpha;
-      q_old[2] = q_old[2] * (1 - alpha) + q_new[2] * alpha;
-      q_old[3] = q_old[3] * (1 - alpha) + q_new[3] * alpha;
-      
-      const len = Math.sqrt(q_old[0]*q_old[0] + q_old[1]*q_old[1] + q_old[2]*q_old[2] + q_old[3]*q_old[3]);
-      q_old[0] /= len; q_old[1] /= len; q_old[2] /= len; q_old[3] /= len;
-      
-      camera.rotation = rotQuat.multiply(new Quaternion(camera.rotation));
-      mouse.lastSpherePos = currentSpherePos;
-      
-    } else if (mouse.dragMode === 'dolly') {
-      const dollySpeed = 0.01;
-      camera.distance += deltaY * dollySpeed;
-      camera.distance = Math.max(0.5, Math.min(20.0, camera.distance));
-      
-    } else if (mouse.dragMode === 'pan') {
-      const panSpeed = 0.005;
-      
-      const eye = camera.getEye();
-      const viewDir = normalize(subtract(camera.lookAt, eye));
-      const up = camera.getUp();
-      const right = normalize(cross(viewDir, up));
-      const trueUp = normalize(cross(right, viewDir));
-      
-      const panX = scale(-deltaX * panSpeed * camera.distance, right);
-      const panY = scale(deltaY * panSpeed * camera.distance, trueUp);
-      
-      camera.lookAt = add(camera.lookAt, add(panX, panY));
-    }
-
-    mouse.lastX = e.offsetX;
-    mouse.lastY = e.offsetY;
-  });
-
-  canvas.addEventListener('mouseup', () => {
-    const timeSinceLastMove = Date.now() - mouse.lastMoveTime;
-    
-    if (mouse.dragMode === 'orbit' && timeSinceLastMove < 20) {
-      const q = spinning.velocity.elements;
-      const rotationMagnitude = Math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2]);
-      
-      if (rotationMagnitude > 0.001) {
-        spinning.active = true;
-      } else {
-        spinning.active = false;
-      }
-    } else {
-      spinning.active = false;
-      spinning.velocity.setIdentity();
-    }
-    
-    mouse.isDragging = false;
-    mouse.dragMode = 'none';
-    mouse.lastSpherePos = null;
-    canvas.style.cursor = 'grab';
-  });
-
-  canvas.addEventListener('mouseleave', () => {
-    mouse.isDragging = false;
-    mouse.dragMode = 'none';
-    mouse.lastSpherePos = null;
-    spinning.active = false;
-    spinning.velocity.setIdentity();
-    canvas.style.cursor = 'grab';
-  });
-
-  canvas.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-  });
-
-  canvas.style.cursor = 'grab';
-}
-
 // --- Asset loader -------------------------------------------------------
 async function loadImageData(url){
   const img = new Image();
@@ -218,49 +73,6 @@ async function main(){
   const ctx = canvas.getContext("webgpu");
   const format = navigator.gpu.getPreferredCanvasFormat();
   ctx.configure({ device, format, alphaMode: "opaque" });
-
-  // Camera State
-  const camera = {
-    distance: 4.5,
-    rotation: new Quaternion(),
-    lookAt: vec3(0, 0, -3),
-    
-    getEye() {
-      const initialEye = vec3(0, 0, this.distance);
-      const rotatedEye = this.rotation.apply(initialEye);
-      return vec3(
-        rotatedEye[0] + this.lookAt[0],
-        rotatedEye[1] + this.lookAt[1],
-        rotatedEye[2] + this.lookAt[2]
-      );
-    },
-    
-    getUp() {
-      const initialUp = vec3(0, 1, 0);
-      return this.rotation.apply(initialUp);
-    }
-  };
-
-  // Mouse State
-  const mouse = {
-    isDragging: false,
-    dragMode: 'none',
-    lastX: 0,
-    lastY: 0,
-    lastSpherePos: null,
-    lastMoveTime: 0
-  };
-
-  // Spinning state
-  const spinning = {
-    active: false,
-    velocity: new Quaternion(),
-    damping: 0.98,
-    amplification: 2.0
-  };
-
-  // Setup mouse controls
-  setupMouseControls(canvas, camera, mouse, spinning);
 
   // UI elements
   const bounceToggle = document.getElementById("bounceToggle");
@@ -297,14 +109,14 @@ async function main(){
   const gIdxBuf = makeBuffer(groundIdx, GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST);
 
   // Ground texture & sampler
-  const img = await loadImageData("../models-images/xamp23.png");
+  const img = await loadImageData("models-images/xamp23.png");
   const texGround = device.createTexture({ size: [img.w, img.h], format: "rgba8unorm", usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST });
   device.queue.writeTexture({ texture: texGround }, img.data, { bytesPerRow: img.w * 4 }, [img.w, img.h, 1]);
 
   const sampler = device.createSampler({ addressModeU: "clamp-to-edge", addressModeV: "clamp-to-edge", minFilter: "linear", magFilter: "linear" });
 
   // Load teapot model
-  const teapotInfo = await readOBJFile("../models-images/teapot.obj", 1.0, false);
+  const teapotInfo = await readOBJFile("models-images/teapot.obj", 1.0, false);
   if (!teapotInfo) { alert("Failed to load teapot.obj"); return; }
 
   const tPos = new Float32Array(teapotInfo.vertices);
@@ -392,7 +204,7 @@ async function main(){
   // Uniform buffers
   const tUBuf = device.createBuffer({ size: 160, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   const rUBuf = device.createBuffer({ size: 160, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
-  const gUBuf = device.createBuffer({ size: 128, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const gUBuf = device.createBuffer({ size: 80, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
 
   // Bind group helper
   const makeBindGroup = (pipeline, index, entries) => {
@@ -400,18 +212,10 @@ async function main(){
   };
 
   // Create bind groups
-  const tBind = makeBindGroup(pipelineTeapot, 1, [ { binding: 0, resource: { buffer: tUBuf } } ]);
-  const rBind = makeBindGroup(pipelineTeapotReflect, 1, [ { binding: 0, resource: { buffer: rUBuf } } ]);
-  const gBind = makeBindGroup(pipelineGround, 0, [ 
-    { binding: 0, resource: { buffer: gUBuf } }, 
-    { binding: 1, resource: sampler }, 
-    { binding: 2, resource: texGround.createView() }
-  ]);
-  const gBindMask = makeBindGroup(pipelineGroundMask, 0, [ 
-    { binding: 0, resource: { buffer: gUBuf } }, 
-    { binding: 1, resource: sampler }, 
-    { binding: 2, resource: texGround.createView() }
-  ]);
+  const tBind = makeBindGroup(pipelineTeapot, 0, [ { binding: 0, resource: { buffer: tUBuf } } ]);
+  const rBind = makeBindGroup(pipelineTeapotReflect, 0, [ { binding: 0, resource: { buffer: rUBuf } } ]);
+  const gBind = makeBindGroup(pipelineGround, 1, [ { binding: 0, resource: { buffer: gUBuf } }, { binding: 1, resource: sampler }, { binding: 2, resource: texGround.createView() } ]);
+  const gBindMask = makeBindGroup(pipelineGroundMask, 1, [ { binding: 0, resource: { buffer: gUBuf } }, { binding: 1, resource: sampler }, { binding: 2, resource: texGround.createView() } ]);
 
   // Depth/stencil texture (resized on demand)
   let depthTex = null;
@@ -454,38 +258,7 @@ async function main(){
     if (lightToggle.checked)  tLight  += 0.02;
     if (bounceToggle.checked) tTeapot += 0.02;
 
-    // Apply spinning if active
-    if (spinning.active) {
-      const q = spinning.velocity.elements;
-      const amplifiedQuat = new Quaternion();
-      const amp_q = amplifiedQuat.elements;
-      
-      amp_q[0] = q[0] * spinning.amplification;
-      amp_q[1] = q[1] * spinning.amplification;
-      amp_q[2] = q[2] * spinning.amplification;
-      amp_q[3] = q[3];
-      
-      const len_amp = Math.sqrt(amp_q[0]*amp_q[0] + amp_q[1]*amp_q[1] + amp_q[2]*amp_q[2] + amp_q[3]*amp_q[3]);
-      amp_q[0] /= len_amp; amp_q[1] /= len_amp; amp_q[2] /= len_amp; amp_q[3] /= len_amp;
-      
-      camera.rotation = amplifiedQuat.multiply(new Quaternion(camera.rotation));
-      
-      q[0] *= spinning.damping;
-      q[1] *= spinning.damping;
-      q[2] *= spinning.damping;
-      q[3] = q[3] * spinning.damping + (1.0 - spinning.damping);
-      
-      const len = Math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
-      q[0] /= len; q[1] /= len; q[2] /= len; q[3] /= len;
-      
-      const rotationMagnitude = Math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2]);
-      if (rotationMagnitude < 0.0001) {
-        spinning.active = false;
-        spinning.velocity.setIdentity();
-      }
-    }
-
-    const { P, V, eye } = makeProjectionView(canvas, camera);
+    const { P, V, eye } = makeProjectionView(canvas);
     const lightPos = vec3(2 * Math.cos(tLight), 2.0, -3 + 2 * Math.sin(tLight));
 
     let yAnim = 0.0;
@@ -518,10 +291,9 @@ async function main(){
 
     const M_ground = mat4();
     const MVP_ground = mult(P, mult(V, M_ground));
-    const gData = new Float32Array(32);
+    const gData = new Float32Array(20);
     gData.set(new Float32Array(flatten(MVP_ground)), 0);
-    const identityMat = mat4();
-    gData.set(new Float32Array(flatten(identityMat)), 16);
+    gData[16] = 0.6;
     device.queue.writeBuffer(gUBuf, 0, gData);
 
     const colorView = ctx.getCurrentTexture().createView();
@@ -529,7 +301,7 @@ async function main(){
     const pass = beginPass(enc, colorView, depthTex, { colorLoadOp: "clear", clearColor: clearColor, depthLoadOp: "clear", depthClearValue: 1, stencilLoadOp: "clear", stencilClearValue: 0 });
 
     pass.setPipeline(pipelineGroundMask);
-    pass.setBindGroup(0, gBindMask);
+    pass.setBindGroup(1, gBindMask);
     pass.setStencilReference(1);
     pass.setVertexBuffer(0, gPosBuf);
     pass.setVertexBuffer(1, gUVBuf);
@@ -537,7 +309,7 @@ async function main(){
     pass.drawIndexed(groundIdx.length);
 
     pass.setPipeline(pipelineTeapotReflect);
-    pass.setBindGroup(1, rBind);
+    pass.setBindGroup(0, rBind);
     pass.setStencilReference(1);
     pass.setVertexBuffer(0, tPosBuf);
     pass.setVertexBuffer(1, tNrmBuf);
@@ -553,14 +325,14 @@ async function main(){
     const mainPass = beginPass(enc, colorView, depthTex, { colorLoadOp: "load", depthLoadOp: "load", stencilLoadOp: "load" });
 
     mainPass.setPipeline(pipelineGround);
-    mainPass.setBindGroup(0, gBind);
+    mainPass.setBindGroup(1, gBind);
     mainPass.setVertexBuffer(0, gPosBuf);
     mainPass.setVertexBuffer(1, gUVBuf);
     mainPass.setIndexBuffer(gIdxBuf, "uint32");
     mainPass.drawIndexed(groundIdx.length);
 
     mainPass.setPipeline(pipelineTeapot);
-    mainPass.setBindGroup(1, tBind);
+    mainPass.setBindGroup(0, tBind);
     mainPass.setVertexBuffer(0, tPosBuf);
     mainPass.setVertexBuffer(1, tNrmBuf);
     mainPass.setVertexBuffer(2, tColBuf);
@@ -570,8 +342,8 @@ async function main(){
     mainPass.end();
     device.queue.submit([enc.finish()]);
 
-    requestAnimationFrame(frame);
+    requestAnimationFrame(frame); // Schedule next frame
   }
 
-  requestAnimationFrame(frame);
+  requestAnimationFrame(frame); // Start render loop
 }
