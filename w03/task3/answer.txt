@@ -1,0 +1,34 @@
+Transformation matrices used:
+
+Part 1:
+- Model matrix (M): used to position and rotate the cube.
+- View matrix (V): created using a look-at function to define the camera.
+- Projection matrix (P): an orthographic projection matrix.
+- Depth remapping matrix (mst): used to convert depth from [-1, 1] to [0, 1] for WebGPU.
+
+Part 2:
+- Model matrices (M1, M2, M3): used to position and rotate each cube differently.
+- View matrix (V): created using a look-at function.
+- Projection matrix (P): a perspective projection matrix.
+- Depth remapping matrix (mst): used to adapt OpenGL-style clip space to WebGPU.
+
+Matrix concatenation:
+
+Part 1:
+The composite matrix applied to each vertex was:
+
+MVP = mst * P * V * M
+
+Part 2:
+A separate composite matrix was used for each cube:
+
+Cube 1 (one-point perspective):
+MVP1 = mst * P * V * M1
+
+Cube 2 (two-point perspective):
+MVP2 = mst * P * V * M2
+
+Cube 3 (three-point perspective):
+MVP3 = mst * P * V * M3
+
+In all cases, the composite matrix is multiplied with the vertex position in the vertex shader to transform vertices from model space to clip space.

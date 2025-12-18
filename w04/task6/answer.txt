@@ -1,0 +1,32 @@
+a: Flat vs Gouraud vs Phong shading:
+- Flat shading: one normal (and one color) per triangle. The whole triangle has the same shading value.
+- Gouraud shading: compute lighting per vertex, output a vertex color, and let the rasterizer interpolate colors across the triangle.
+- Phong shading: interpolate the normal (and often position) across the triangle, then compute lighting per fragment (pixel).
+
+How to implement flat shading:
+- Compute one normal per triangle (e.g., from the triangles three vertices using a cross product).
+- Use that same normal for all three vertices of the triangle, OR pass a "flat" value that does not interpolate and use it in the fragment shader.
+- In practice in WebGPU/WGSL: duplicate vertices so each triangle has its own vertices, assign the same normal to those 3 vertices, then do lighting normally (this produces flat shading).
+
+Based on Parts 4 and 5 for highlights:
+- Phong shading is best for highlights. Highlights are small and can be missed if only computed at vertices (Gouraud).
+- Phong computes specular per pixel, so the highlight looks smoother and appears in the correct place.
+
+b: Directional light vs point light:
+- Directional light: light rays are parallel everywhere. The light has only a direction (no position). No distance falloff.
+- Point light: light comes from a position in space. The light direction depends on the point being shaded, and it usually has distance falloff (attenuation).
+
+c: Does eye position influence shading?
+- For diffuse shading: no (diffuse depends on the normal and the light direction).
+- For specular shading: yes (specular depends on the view direction from the point to the eye).
+
+d: Effect of setting specular term to (0,0,0):
+- Specular highlights disappear completely. The object will only show ambient + diffuse shading.
+
+e: Effect of increasing the shininess exponent (alpha):
+- The specular highlight becomes smaller and sharper (more concentrated).
+- Lower alpha makes the highlight wider and more spread out.
+
+f: Coordinate space used for lighting:
+- Lighting was computed in object/world space, since the sphere position is used directly as both position and normal.
+- The eye position and light direction were also handled in the same space, so the dot products were consistent.

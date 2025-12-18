@@ -1,0 +1,27 @@
+Projection shadows
+
+Advantages:
+- Simple to implement and easy to understand.
+- Computationally cheap since it only requires projecting geometry.
+- No additional textures or depth comparisons are needed.
+
+Disadvantages:
+- No self-shadowing; objects cannot cast shadows on themselves.
+- Works reliably only on simple surfaces such as a flat ground plane.
+- Produces unrealistic artifacts such as stretched or intersecting shadows.
+- Shadows can extend outside the intended surface unless explicitly clipped.
+- Not suitable for complex scenes with multiple objects and receivers.
+
+Shadow mapping
+
+Advantages:
+- Supports self-shadowing and shadows between arbitrary objects.
+- Works for complex geometry and multiple shadow-receiving surfaces.
+- More physically plausible, since shadows are based on visibility from the light source.
+- Can be extended with filtering techniques (e.g. PCF) to produce softer shadows.
+
+Disadvantages:
+- More complex to implement, requiring additional coordinate spaces and render passes.
+- Higher memory and performance cost due to shadow map textures.
+- Susceptible to artifacts such as shadow acne and Peter-panning, which require bias tuning.
+- Shadow quality depends on the resolution of the shadow map and light frustum setup.

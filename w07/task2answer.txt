@@ -1,0 +1,30 @@
+Explanation of the transformation:
+
+The background environment is rendered using a full-screen quad defined
+directly in clip space. Because the quad already covers the entire
+viewport, no projection or view transformation is applied when rendering
+the background geometry.
+
+To obtain correct sampling directions for the cube map, the clip-space
+positions of the background quad are transformed into world-space
+directions. This is done using the matrix Mtex, which is constructed from
+the inverse view and inverse projection matrices, with the translation
+component removed. As a result, Mtex converts clip-space coordinates into
+direction vectors originating from the camera.
+
+In the fragment shader, the clip-space position is multiplied by Mtex and
+divided by its homogeneous component to obtain a world-space direction.
+This direction is normalized and used as the lookup direction for the
+cube map texture.
+
+For the sphere, cube map sampling is based on the world-space surface
+normal. The surface normal is transformed by the model matrix and
+normalized before being used as a texture lookup direction. This causes
+the environment to appear mapped onto the sphere surface.
+
+Both the background and the sphere use the same cube map texture, but
+different direction computations. The background represents the
+environment at infinity, while the sphere reflects the environment based
+on its surface orientation. As the camera orbits the scene, both the
+background and the sphere update consistently, creating a coherent
+environment-mapped result.

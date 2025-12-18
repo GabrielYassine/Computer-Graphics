@@ -1,0 +1,31 @@
+Earth texture mapping using surface normals:
+
+The Earth texture is mapped onto the sphere by computing texture
+coordinates directly in the fragment shader. The surface normal of
+each fragment is used as an intermediate representation, since the
+normals of a unit sphere correspond to points on the sphere surface.
+
+The normal vector is first normalized and interpreted as a point on the
+unit sphere. Spherical coordinates are then derived from this vector.
+The horizontal texture coordinate u is computed using atan2 on the x
+and z components of the normal, ensuring correct handling of all
+quadrants. The vertical texture coordinate v is computed using acos of
+the y component of the normal. The resulting u and v values are scaled
+to the range [0, 1] and used for texture lookup.
+
+The color sampled from the Earth texture is used as the diffuse
+reflection coefficient. The sphere is illuminated using a directional
+light and a constant ambient term, producing a diffuse shaded globe.
+
+Filtering choice:
+
+The Earth texture has high resolution, which causes minification
+artifacts when the sphere rotates, especially in detailed regions such
+as mountain ranges. To reduce shimmering and aliasing, mipmapping is
+enabled and linear mipmap filtering is used. This approach selects
+lower-resolution texture levels when the surface is far from the camera
+and blends smoothly between mipmap levels.
+
+Linear filtering provides a good balance between reducing aliasing and
+preserving texture detail, avoiding excessive blurring while producing
+stable visual results during camera orbiting.

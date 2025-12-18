@@ -1,0 +1,38 @@
+Texture filtering and mipmapping:
+
+Texture filtering determines how texture values are sampled when texture
+coordinates do not map exactly to a single texel.
+
+Magnification:
+Magnification occurs when a texture is displayed larger than its resolution.
+Using nearest filtering selects the closest texel, which results in a blocky
+and pixelated appearance. Using linear filtering interpolates between nearby
+texels, producing a smoother result but slightly blurred edges.
+
+Minification:
+Minification occurs when a texture is displayed smaller than its resolution.
+Without mipmapping, nearest filtering causes strong aliasing and flickering,
+while linear filtering reduces some artifacts but still produces shimmering
+patterns.
+
+Mipmapping:
+Mipmapping reduces minification artifacts by selecting a prefiltered,
+lower-resolution version of the texture. This significantly reduces aliasing
+when the textured surface is far from the camera.
+
+Mipmap filtering:
+Nearest mipmap filtering selects the closest mipmap level and can produce
+visible transitions between levels. Linear mipmap filtering blends between
+mipmap levels, resulting in smoother transitions and more stable visuals.
+
+Wrapping modes:
+Repeat wrapping causes the texture to tile across the surface, while
+clamp-to-edge stretches the border texels when texture coordinates exceed the
+range. Wrapping affects how textures behave outside the standard coordinate
+range but does not change filtering quality.
+
+Overall:
+Nearest filtering preserves sharp texel boundaries but introduces aliasing.
+Linear filtering improves visual smoothness. Mipmapping is essential for
+reducing minification artifacts and producing stable textures at varying
+distances.

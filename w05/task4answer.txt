@@ -1,0 +1,13 @@
+Surface normals and shading:
+
+The surface normals are obtained directly from the OBJ file. Each vertex in the triangle mesh has an associated normal vector that is computed when the model is created. These normals represent the local surface direction at each vertex.
+
+In the vertex shader, the normals are transformed using the model matrix and passed to the fragment shader. In the fragment shader, the normals are interpolated across each triangle and then normalized again. The interpolated normal is used together with the light direction and the view direction to compute the Phong illumination model.
+
+Relation to surface smoothness:
+
+Using per-vertex normals results in smooth shading across the surface of the object. Because the normals are interpolated between vertices, the lighting changes gradually across triangle boundaries. This makes the mesh appear smooth, even though it is composed of flat triangles.
+
+If instead a single normal per triangle were used, the shading would be constant across each triangle and would change abruptly at triangle edges. This would make the surface appear faceted rather than smooth.
+
+Therefore, smooth surface appearance is achieved by using vertex normals and interpolating them during rasterization, while flat shading results from using one normal per triangle.

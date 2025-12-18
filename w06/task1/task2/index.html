@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Worksheet 6 - Task 2</title>
+
+  <link rel="stylesheet" href="../../styles.css">
+  <script src="../../util/MV.js"></script>
+  <script src="../../util/genmipmap.js"></script>
+  <script defer src="main.js"></script>
+</head>
+<body>
+  <canvas id="my-canvas" width="960" height="540"></canvas>
+
+  <div class="row">
+    <label for="wrap">Wrap</label>
+    <select id="wrap">
+      <option value="repeat" selected>repeat</option>
+      <option value="clamp-to-edge">clamp-to-edge</option>
+    </select>
+
+    <label for="minF">minFilter</label>
+    <select id="minF">
+      <option value="nearest">nearest</option>
+      <option value="linear" selected>linear</option>
+    </select>
+
+    <label for="magF">magFilter</label>
+    <select id="magF">
+      <option value="nearest" selected>nearest</option>
+      <option value="linear">linear</option>
+    </select>
+
+    <label for="mipF">mipmapFilter</label>
+    <select id="mipF">
+      <option value="nearest">nearest</option>
+      <option value="linear" selected>linear</option>
+    </select>
+
+    <label style="margin-left:1rem">
+      <input type="checkbox" id="useMips" checked>
+      mipmapping
+    </label>
+  </div>
+</body>
+</html>
