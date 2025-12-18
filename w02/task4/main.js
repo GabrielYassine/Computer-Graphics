@@ -34,14 +34,14 @@ async function main() {
   });
 
   const COLORS = [
-    { r: 0, g: 0, b: 0 },         // Black
-    { r: 1, g: 0, b: 0 },         // Red
-    { r: 1, g: 1, b: 0 },         // Yellow
-    { r: 0, g: 1, b: 0 },         // Green
-    { r: 0, g: 0, b: 1 },         // Blue
-    { r: 1, g: 0, b: 1 },         // Magenta
-    { r: 0, g: 1, b: 1 },         // Cyan
-    { r: 0.3921, g: 0.5843, b: 0.9294 } // Cornflower
+    { r: 0, g: 0, b: 0 },
+    { r: 1, g: 0, b: 0 },
+    { r: 1, g: 1, b: 0 },
+    { r: 0, g: 1, b: 0 },
+    { r: 0, g: 0, b: 1 },
+    { r: 1, g: 0, b: 1 },
+    { r: 0, g: 1, b: 1 },
+    { r: 0.3921, g: 0.5843, b: 0.9294 }
   ];
 
   const drawSel = document.getElementById("drawColor");
@@ -109,7 +109,6 @@ async function main() {
       const p0 = vec2(center[0] + r * Math.cos(a0), center[1] + r * Math.sin(a0));
       const p1 = vec2(center[0] + r * Math.cos(a1), center[1] + r * Math.sin(a1));
 
-      // triangle fan: (center, p0, p1)
       positions.push(center, p0, p1);
       colors.push(cCenter, cRim, cRim);
     }
@@ -117,13 +116,10 @@ async function main() {
     return { positions, colors };
   }
 
-  // Saved shapes
-  const shapes = []; // point, triangle, circle
+  const shapes = [];
 
-  // Temporary triangle build
-  const pendingTri = []; // [{ p, c }]
+  const pendingTri = [];
 
-  // Temporary circle build
   let circleCenter = null;
   let circleCenterColor = null;
 
@@ -135,7 +131,7 @@ async function main() {
     const positions = [];
     const colors = [];
 
-    // Saved shapes
+    
     for (const s of shapes) {
       if (s.type === "point") {
         const o = makePoint(s.center, s.color, pointSize);
@@ -151,7 +147,7 @@ async function main() {
       }
     }
 
-    // Pending triangle points (first two clicks)
+    
     if (pendingTri.length) {
       for (const v of pendingTri) {
         const o = makePoint(v.p, v.c, pointSize);
@@ -160,7 +156,7 @@ async function main() {
       }
     }
 
-    // Pending circle center point (first click)
+    
     if (circleCenter) {
       const o = makePoint(circleCenter, circleCenterColor, pointSize);
       positions.push(...o.positions);
@@ -231,14 +227,11 @@ async function main() {
       return;
     }
 
-    // Circle mode
     if (!circleCenter) {
-      // First click: place a point as circle center
       circleCenter = p;
       circleCenterColor = c;
       render();
     } else {
-      // Second click: replace center point with circle
       const r = Math.hypot(p[0] - circleCenter[0], p[1] - circleCenter[1]);
       shapes.push({
         type: "circle",
@@ -251,6 +244,7 @@ async function main() {
       circleCenterColor = null;
       render();
     }
+  
   });
 
   clearBtn.addEventListener("click", () => {

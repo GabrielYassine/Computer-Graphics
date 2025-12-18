@@ -176,9 +176,7 @@ async function main() {
       return;
     }
 
-    // Triangle mode:
-    // - first two clicks: show them as points
-    // - third click: remove the two points and replace with one triangle
+    
     pendingTri.push({ p, c });
 
     if (pendingTri.length === 3) {
