@@ -14,7 +14,7 @@ async function main() {
   const context = canvas.getContext("webgpu");
   const format = gpu.getPreferredCanvasFormat();
   context.configure({ device, format });
-
+  
   // ---------- Shader + pipeline ----------
   const shaderCode = await (await fetch("shader.wgsl")).text();
   const shaderModule = device.createShaderModule({ code: shaderCode });
@@ -81,16 +81,13 @@ async function main() {
     const aspect = canvas.width / canvas.height;
 
     if (projectionMenu.value === "Perspective") {
-      // REQUIRED for task 2
       return perspective(45, aspect, 0.1, 100.0);
     }
 
-    // Orthographic option kept (same style as your earlier solution)
     const s = 3;
     return ortho(-s, s, -s, s, 0.1, 100.0);
   }
 
-  // WebGPU depth correction (MV.js uses OpenGL style depth)
   const mst = mat4(
     vec4(1,0,0,0),
     vec4(0,1,0,0),
@@ -103,14 +100,8 @@ async function main() {
     const V = lookAt(vec3(0, 0, 6), vec3(0, 0, 0), vec3(0, 1, 0));
 
     // ----- Three required views -----
-
-    // one-point (front)
     const M1 = translate(-2.2, 0, -6);
-
-    // two-point (X)
     const M2 = mult(translate(0, 0, -6), rotateY(45));
-
-    // three-point
     const M3 = mult(
       translate(2.2, 0, -6),
       mult(rotateX(35), rotateY(45))
@@ -150,7 +141,6 @@ async function main() {
     pass.setVertexBuffer(0, posBuffer);
     pass.setIndexBuffer(idxBuffer, "uint32");
 
-    // draw cube 3 times
     pass.drawIndexed(indices.length, 3);
 
     pass.end();

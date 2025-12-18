@@ -1,12 +1,12 @@
 // ============================================================
-// Helpers (shadow map stored in rgba32float, depth in .r)
+ 
 // ============================================================
 
 fn clip_to_uvz(clip: vec4f) -> vec3f {
-  let ndc = clip.xyz / clip.w;          // x,y in [-1,1], z in [-1,1] (MV.js perspective style)
+  let ndc = clip.xyz / clip.w;
   let u = ndc.x * 0.5 + 0.5;
-  let v = 1.0 - (ndc.y * 0.5 + 0.5);    // flip Y for texture coords
-  let z01 = ndc.z * 0.5 + 0.5;          // map to [0,1]
+  let v = 1.0 - (ndc.y * 0.5 + 0.5);
+  let z01 = ndc.z * 0.5 + 0.5;
   return vec3f(u, v, z01);
 }
 
@@ -26,7 +26,7 @@ fn shadow_pcf_3x3(shadowTex: texture_2d<f32>, uv: vec2f, z: f32, bias: f32) -> f
       let uvOff = uv + vec2f(f32(ox), f32(oy)) * texel;
 
       if (!in_range01(uvOff)) {
-        sum = sum + 1.0; // outside = lit
+        sum = sum + 1.0;
         continue;
       }
 
@@ -55,7 +55,7 @@ struct GroundUBO {
 @group(0) @binding(0) var groundSamp : sampler;
 @group(0) @binding(1) var groundTex  : texture_2d<f32>;
 @group(0) @binding(2) var<uniform> gU : GroundUBO;
-@group(0) @binding(3) var shadowMap  : texture_2d<f32>; // rgba32float (unfilterable-float)
+@group(0) @binding(3) var shadowMap  : texture_2d<f32>;
 
 struct GroundVSOut {
   @builtin(position) pos : vec4f,
@@ -79,7 +79,7 @@ fn ground_vs(
 fn ground_fs(in : GroundVSOut) -> @location(0) vec4f {
   let base = textureSample(groundTex, groundSamp, in.uv).rgb;
 
-  // Shadow test using light clip position
+  
   let uvz = clip_to_uvz(in.lightClip);
   let uv = uvz.xy;
   let z  = uvz.z;
@@ -102,13 +102,13 @@ fn ground_fs(in : GroundVSOut) -> @location(0) vec4f {
 struct TeapotUBO {
   model    : mat4x4f,
   mvp      : mat4x4f,
-  lightMVP : mat4x4f,  // IMPORTANT: this is (Plight*Vlight*Model)
+  lightMVP : mat4x4f,
   lightPos : vec4f,
   eyePos   : vec4f,
 };
 
 @group(0) @binding(0) var<uniform> tU : TeapotUBO;
-@group(0) @binding(1) var shadowMap2 : texture_2d<f32>; // rgba32float
+@group(0) @binding(1) var shadowMap2 : texture_2d<f32>;
 
 struct TeapotVSOut {
   @builtin(position) pos_clip : vec4f,
@@ -131,7 +131,7 @@ fn teapot_vs(
   out.pos_world = pw;
   out.n_world   = nw;
 
-  // NOTE: lightMVP already includes Model, so multiply by object position directly
+  
   out.lightClip = tU.lightMVP * vec4f(inPos, 1.0);
 
   return out;
@@ -145,11 +145,11 @@ fn teapot_fs(in : TeapotVSOut) -> @location(0) vec4f {
 
   let diff = max(dot(N, L), 0.0);
 
-  // tiny spec (optional but still “basic shading”)
+  
   let H = normalize(L + V);
   let spec = pow(max(dot(N, H), 0.0), 24.0) * 0.25;
 
-  // Shadow lookup
+  
   let uvz = clip_to_uvz(in.lightClip);
   let uv = uvz.xy;
   let z  = uvz.z;

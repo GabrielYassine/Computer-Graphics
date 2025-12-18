@@ -10,7 +10,6 @@ const camera = {
   at: vec3(0, 0, -3),
   up: vec3(0, 1, 0),
 
-  // Week 8 had eye=(0,0,1.5) and at=(0,0,-3) => radius = 4.5
   radius: 4.5,
   yaw: 0.0,
   pitch: 0.0,
@@ -73,9 +72,7 @@ function makePV(canvas){
   return { P, V };
 }
 
-// shadow projection onto plane y = -1
 function shadowMatrixPointToPlane(L){
-  // plane: 0*x + 1*y + 0*z + 1 = 0
   const a=0, b=1, c=0, d=1;
   const lx=L[0], ly=L[1], lz=L[2], lw=1.0;
   const dot = a*lx + b*ly + c*lz + d*lw;
@@ -167,7 +164,7 @@ async function main(){
   // pipelines
   const shader = device.createShaderModule({ code: await (await fetch("shader.wgsl")).text() });
 
-  // Objects pipeline (keep back-face culling)
+  // Objects pipeline
   const pipeObj = device.createRenderPipeline({
     layout:"auto",
     vertex:{
@@ -182,7 +179,7 @@ async function main(){
     depthStencil:{ format:"depth24plus", depthWriteEnabled:true, depthCompare:"less" }
   });
 
-  // Ground pipeline (NO culling so it’s visible from below)
+  // Ground pipeline
   const pipeGround = device.createRenderPipeline({
     layout:"auto",
     vertex:{
@@ -197,7 +194,7 @@ async function main(){
     depthStencil:{ format:"depth24plus", depthWriteEnabled:true, depthCompare:"less" }
   });
 
-  // Shadow pipeline: no cull, depthCompare "greater", alpha blend
+  // Shadow pipeline
   const pipeShadow = device.createRenderPipeline({
     layout:"auto",
     vertex:{
@@ -276,14 +273,14 @@ async function main(){
   function frame(){
     const {P,V} = makePV(canvas);
 
-    // moving light (unchanged)
+    
     t += 0.015;
     const L = vec3(2*Math.cos(t), 2.0, -2 + 2*Math.sin(t));
 
     const I = mat4();
     const MVP  = mult(P, mult(V, I));
 
-    // push shadow slightly BELOW ground so depthCompare:"greater" passes only on ground
+    
     const Ms0  = shadowMatrixPointToPlane(L);
     const Ms   = mult(translate(0, -0.001, 0), Ms0);
     const MVPs = mult(P, mult(V, Ms));

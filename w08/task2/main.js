@@ -17,9 +17,7 @@ function makePV(canvas){
 }
 function mul4(a,b){ return mult(a,b); }
 
-// shadow projection onto plane y = -1
 function shadowMatrixPointToPlane(L){
-  // plane: 0*x + 1*y + 0*z + 1 = 0
   const a=0, b=1, c=0, d=1;
   const lx=L[0], ly=L[1], lz=L[2], lw=1.0;
   const dot = a*lx + b*ly + c*lz + d*lw;

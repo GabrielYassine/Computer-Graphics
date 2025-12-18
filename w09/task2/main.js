@@ -17,7 +17,6 @@ function makePV(canvas){
   return { P, V };
 }
 
-// planar shadow matrix onto y = -1  (plane y+1=0 : a,b,c,d = 0,1,0,1)
 function shadowMatrixPointToPlane(L){
   const a=0, b=1, c=0, d=1;
   const lx=L[0], ly=L[1], lz=L[2], lw=1.0;
@@ -97,8 +96,8 @@ async function main(){
   const teapot = await readOBJFile("../../models-images/teapot.obj", 1.0, true);
   if (!teapot) { alert("Failed to load teapot.obj"); return; }
 
-  const tPos = f32(teapot.vertices); // vec4
-  const tNrm = f32(teapot.normals);  // vec4
+  const tPos = f32(teapot.vertices);
+  const tNrm = f32(teapot.normals);
   const tIdx = u32(teapot.indices);
 
   const tPosBuf = makeVBuf(tPos);
@@ -136,7 +135,7 @@ async function main(){
     depthStencil:{ format:"depth24plus", depthWriteEnabled:true, depthCompare:"less" },
   });
 
-  // Shadow pipeline (W08 Part 3 trick): only on ground
+  
   const pipeShadow = device.createRenderPipeline({
     layout:"auto",
     vertex:{
@@ -162,7 +161,7 @@ async function main(){
     ]
   });
 
-  // Teapot: mvp(64) + model(64) + lightPos(16) = 144
+  
   const uTeapot = device.createBuffer({ size:144, usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST });
   const bgTeapot = device.createBindGroup({
     layout: pipeTeapot.getBindGroupLayout(1),
@@ -206,8 +205,8 @@ async function main(){
 
     // Teapot model (scale 0.25, base translate (0,-1,-3), bounce y:-1..0.5)
     let yOffset = 0.0;
-    if (bounceToggle.checked) {
-      yOffset = 1.5 * (0.5 * (Math.sin(tTeapot) + 1.0)); // [0..1.5]
+      if (bounceToggle.checked) {
+      yOffset = 1.5 * (0.5 * (Math.sin(tTeapot) + 1.0));
     }
     const M = mult( translate(0, -1 + yOffset, -3), scalem(0.25,0.25,0.25) );
     const MVPt = mul4(P, mul4(V, M));
@@ -218,9 +217,7 @@ async function main(){
     pack.set(new Float32Array([L[0], L[1], L[2], 1.0]), 32);
     device.queue.writeBuffer(uTeapot, 0, pack);
 
-    // Shadow MVP:
-    // IMPORTANT: apply MODEL first, then SHADOW projection => Shadow * Model
-    // Push shadow slightly BELOW ground like W08 Part 3
+    
     const Ms0 = shadowMatrixPointToPlane(L);
     const Ms  = mult(translate(0, -0.001, 0), Ms0);
     const Mshadow = mult(Ms, M);

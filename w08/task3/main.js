@@ -17,9 +17,7 @@ function makePV(canvas){
 }
 function mul4(a,b){ return mult(a,b); }
 
-// shadow projection onto plane y = -1
 function shadowMatrixPointToPlane(L){
-  // plane: 0*x + 1*y + 0*z + 1 = 0
   const a=0, b=1, c=0, d=1;
   const lx=L[0], ly=L[1], lz=L[2], lw=1.0;
   const dot = a*lx + b*ly + c*lz + d*lw;
@@ -124,7 +122,6 @@ async function main(){
     depthStencil:{ format:"depth24plus", depthWriteEnabled:true, depthCompare:"less" }
   });
 
-  // shadow pipeline (only on ground): depthCompare "greater", no depth write, no culling, no blending
   const pipeShadow = device.createRenderPipeline({
     layout:"auto",
     vertex:{
@@ -200,7 +197,6 @@ async function main(){
     const I = mat4();
     const MVP  = mul4(P, mul4(V, I));
 
-    // push shadow slightly BELOW ground so depthCompare:"greater" passes only on ground
     const Ms0  = shadowMatrixPointToPlane(L);
     const Ms   = mult(translate(0, -0.001, 0), Ms0);
     const MVPs = mul4(P, mul4(V, Ms));
@@ -212,7 +208,7 @@ async function main(){
     device.queue.writeBuffer(uRed, 64, new Float32Array([1,1,1,1]));
 
     device.queue.writeBuffer(uShadow, 0, new Float32Array(flatten(MVPs)));
-    device.queue.writeBuffer(uShadow, 64, new Float32Array([0,0,0,1])); // still opaque in Part 3
+    device.queue.writeBuffer(uShadow, 64, new Float32Array([0,0,0,1]));
 
     const enc = device.createCommandEncoder();
     const pass = enc.beginRenderPass({

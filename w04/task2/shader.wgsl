@@ -19,7 +19,6 @@ fn main_vs(input : VSIn) -> VSOut {
   var out : VSOut;
   out.position = U.mvp * vec4<f32>(input.pos, 1.0);
 
-  // c = 0.5 * p + 0.5
   out.color = 0.5 * input.pos + vec3<f32>(0.5, 0.5, 0.5);
   return out;
 }

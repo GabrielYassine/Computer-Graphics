@@ -1,7 +1,6 @@
 "use strict";
 window.onload = () => main();
 
-// CHANGE THESE if your folder differs
 const TEAPOT_OBJ_PATH = "../../models-images/teapot.obj";
 const GROUND_TEX_PATH = "../../models-images/xamp23.png";
 const SHADER_PATH     = "shader.wgsl";
@@ -47,14 +46,13 @@ function writeMat4(device, buffer, M) {
 }
 
 function writeGroundUniforms(device, buffer, mvp, lightMVP) {
-  const data = new Float32Array(32); // 2 mat4 = 32 floats = 128 bytes
+  const data = new Float32Array(32);
   data.set(flatten(mvp), 0);
   data.set(flatten(lightMVP), 16);
   device.queue.writeBuffer(buffer, 0, data);
 }
 
 function writeTeapotUniforms(device, buffer, model, mvp, lightMVP, lightPos, eyePos) {
-  // model(16) + mvp(16) + lightMVP(16) + lightPos(4) + eye(4) = 56 floats = 224 bytes
   const data = new Float32Array(56);
   data.set(flatten(model), 0);
   data.set(flatten(mvp), 16);
@@ -285,11 +283,11 @@ async function main() {
   });
 
   // ---------- Camera + matrices ----------
-  const eye = vec3(2.5, 1.2, 0.5);
-  const at  = vec3(0.0, -1.0, -3.0);
+  const eye = vec3(0, 0.75, 2.0);
+  const at  = vec3(0, -0.5, -3.0);
   const up  = vec3(0, 1, 0);
 
-  const P = perspective(60, canvas.width / canvas.height, 0.1, 50);
+  const P = perspective(50, canvas.width / canvas.height, 0.1, 100);
   const Mground = mat4();
 
   const S_teapot = scalem(0.25, 0.25, 0.25);
@@ -310,12 +308,11 @@ async function main() {
 
     const V = lookAt(eye, at, up);
 
-    // Bounce like Part 2: maintain a teapot timer and use sin() to get [0..1.5]
     if (bounceToggle && bounceToggle.checked) tTeapot += 0.02;
     const yOffset = bounceToggle && bounceToggle.checked ? 1.5 * (0.5 * (Math.sin(tTeapot) + 1.0)) : 0.0;
     const Mteapot = mult(translate(0.0, -1 + yOffset, -3.0), S_teapot);
 
-    // Light matrices (tune these if needed)
+    
     const lightAt = vec3(0.0, -1.0, -3.0);
     const Vlight = lookAt(lightPos, lightAt, vec3(0,1,0));
     const Plight = perspective(50, 1.0, 0.5, 12.0);

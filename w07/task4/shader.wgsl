@@ -3,7 +3,7 @@ struct Uniforms {
   mtex  : mat4x4<f32>,
   model : mat4x4<f32>,
   eye   : vec4<f32>,
-  flags : vec4<u32>,     // x = isBG, y = reflective
+  flags : vec4<u32>,
 };
 
 @group(0) @binding(0) var<uniform> U : Uniforms;

@@ -81,8 +81,8 @@ async function main(){
   const teapot = await readOBJFile("../../models-images/teapot.obj", 1.0, true);
   if (!teapot) { alert("Failed to load teapot.obj"); return; }
 
-  const tPos = f32(teapot.vertices); // vec4
-  const tNrm = f32(teapot.normals);  // vec4
+  const tPos = f32(teapot.vertices);
+  const tNrm = f32(teapot.normals);
   const tIdx = u32(teapot.indices);
 
   const tPosBuf = device.createBuffer({ size:tPos.byteLength, usage:GPUBufferUsage.VERTEX|GPUBufferUsage.COPY_DST });
@@ -128,7 +128,6 @@ async function main(){
   // ---------- Uniforms ----------
   const uGround = device.createBuffer({ size:64, usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST });
 
-  // teapot: mvp(64) + model(64) + lightPos(16) = 144 bytes
   const uTeapot = device.createBuffer({ size:144, usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST });
 
   const bgGround = device.createBindGroup({
@@ -173,7 +172,7 @@ async function main(){
     // teapot model: scale 0.25, translate (0,-1,-3), optional bounce y:-1..0.5
     let yOffset = 0.0;
     if (bounceToggle.checked) {
-      yOffset = 1.5 * (0.5 * (Math.sin(t) + 1.0)); // [0 .. 1.5]
+      yOffset = 1.5 * (0.5 * (Math.sin(t) + 1.0));
     }
     const M = mult( translate(0, -1 + yOffset, -3), scalem(0.25,0.25,0.25) );
     const MVPt = mul4(P, mul4(V, M));

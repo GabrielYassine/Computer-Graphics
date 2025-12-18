@@ -12,8 +12,6 @@ function qNormalize(q){
   const n = Math.hypot(q.w, q.x, q.y, q.z) || 1;
   return { w:q.w/n, x:q.x/n, y:q.y/n, z:q.z/n };
 }
-
-// Hamilton product: a*b
 function qMul(a,b){
   return {
     w: a.w*b.w - a.x*b.x - a.y*b.y - a.z*b.z,
@@ -36,7 +34,6 @@ function qFromAxisAngle(axis, angle){
 
 function qConj(q){ return { w:q.w, x:-q.x, y:-q.y, z:-q.z }; }
 
-// rotate vec3 by quaternion q: v' = q * (0,v) * conj(q)
 function qRotateVec3(q, v){
   const p = { w:0, x:v[0], y:v[1], z:v[2] };
   const t = qMul(qMul(q, p), qConj(q));
@@ -45,12 +42,10 @@ function qRotateVec3(q, v){
 
 function clamp(x, lo, hi){ return Math.max(lo, Math.min(hi, x)); }
 
-// Build quaternion that rotates vFrom -> vTo (both assumed normalized)
 function qFromTo(vFrom, vTo){
   const fx=vFrom[0], fy=vFrom[1], fz=vFrom[2];
   const tx=vTo[0],   ty=vTo[1],   tz=vTo[2];
 
-  // axis = cross(from,to)
   const ax = fy*tz - fz*ty;
   const ay = fz*tx - fx*tz;
   const az = fx*ty - fy*tx;
@@ -58,7 +53,6 @@ function qFromTo(vFrom, vTo){
   const dot = clamp(fx*tx + fy*ty + fz*tz, -1, 1);
   const axisLen = Math.hypot(ax, ay, az);
 
-  // If vectors are almost identical: no rotation
   if (axisLen < 1e-8) {
     return qIdentity();
   }
@@ -70,24 +64,20 @@ function qFromTo(vFrom, vTo){
 
 // ===================== Trackball projection (sphere + hyperbola) =========
 function trackballProject(x, y){
-  // x,y expected in [-1,1]
-  // Sphere blended with hyperbola (classic trackball):
-  // if d < 1/sqrt(2): z = sqrt(1 - d^2)
-  // else:            z = (1/2)/d
   const d = Math.hypot(x, y);
   let z;
   const r = 1.0;
-  const t = r * Math.SQRT1_2; // r / sqrt(2)
+  const t = r * Math.SQRT1_2;
 
   if (d < t) {
     z = Math.sqrt(r*r - d*d);
   } else if (d > 1e-8) {
-    z = (t*t) / d;  // (r^2/2)/d
+    z = (t*t) / d;
   } else {
     z = r;
   }
 
-  // normalize to unit length
+  
   const n = Math.hypot(x, y, z) || 1;
   return vec3(x/n, y/n, z/n);
 }
@@ -95,11 +85,11 @@ function trackballProject(x, y){
 // ===================== Camera (W10 Part 2: quaternion trackball orbit) ===
 const camera = {
   at: vec3(0, 0, -3),
-  radius: 4.5,             // distance from at
-  q: qIdentity(),          // orientation quaternion
+  radius: 4.5,
+  q: qIdentity(),
 
   // base vectors in "camera orbit space"
-  baseOffset: vec3(0, 0, 1), // (0,0,1) gets scaled by radius
+  baseOffset: vec3(0, 0, 1),
   baseUp:     vec3(0, 1, 0),
 
   getEye(){
@@ -122,7 +112,6 @@ function mouseToNDC(canvas, e){
   // Convert mouse to [-1,1] in canvas space
   const x = (2 * e.offsetX / canvas.width) - 1;
   const y = 1 - (2 * e.offsetY / canvas.height);
-
   // Optional: account for aspect so the trackball feels circular
   const aspect = canvas.width / canvas.height;
   let xx = x, yy = y;
@@ -147,7 +136,7 @@ function installTrackballOrbit(canvas){
     const ndc = mouseToNDC(canvas, e);
     const curV = trackballProject(ndc.x, ndc.y);
 
-    // rotation that takes lastV -> curV
+    
     const dq = qFromTo(mouse.lastV, curV);
 
     camera.q = qNormalize(qMul(camera.q, dq));
@@ -173,9 +162,7 @@ function makePV(canvas){
   return { P, V };
 }
 
-// shadow projection onto plane y = -1
 function shadowMatrixPointToPlane(L){
-  // plane: 0*x + 1*y + 0*z + 1 = 0
   const a=0, b=1, c=0, d=1;
   const lx=L[0], ly=L[1], lz=L[2], lw=1.0;
   const dot = a*lx + b*ly + c*lz + d*lw;
@@ -272,7 +259,7 @@ async function main(){
   // pipelines
   const shader = device.createShaderModule({ code: await (await fetch("shader.wgsl")).text() });
 
-  // Objects pipeline (double-sided so they show from below)
+  // Objects pipeline
   const pipeObj = device.createRenderPipeline({
     layout:"auto",
     vertex:{
@@ -287,7 +274,7 @@ async function main(){
     depthStencil:{ format:"depth24plus", depthWriteEnabled:true, depthCompare:"less" }
   });
 
-  // Ground pipeline (double-sided)
+  // Ground pipeline
   const pipeGround = device.createRenderPipeline({
     layout:"auto",
     vertex:{
@@ -302,7 +289,7 @@ async function main(){
     depthStencil:{ format:"depth24plus", depthWriteEnabled:true, depthCompare:"less" }
   });
 
-  // Shadow pipeline: no cull, depthCompare "greater", alpha blend
+  // Shadow pipeline
   const pipeShadow = device.createRenderPipeline({
     layout:"auto",
     vertex:{
@@ -327,7 +314,7 @@ async function main(){
     depthStencil:{ format:"depth24plus", depthWriteEnabled:false, depthCompare:"greater" }
   });
 
-  // UBOs (mat4 + vec4) => 64 + 16 = 80 bytes
+  // UBOs (mat4 + vec4)
   function makeUBuf(){
     return device.createBuffer({ size:80, usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST });
   }
@@ -381,14 +368,12 @@ async function main(){
   function frame(){
     const {P,V} = makePV(canvas);
 
-    // moving light (unchanged)
     t += 0.015;
     const L = vec3(2*Math.cos(t), 2.0, -2 + 2*Math.sin(t));
 
     const I = mat4();
     const MVP  = mult(P, mult(V, I));
 
-    // push shadow slightly BELOW ground so depthCompare:"greater" passes only on ground
     const Ms0  = shadowMatrixPointToPlane(L);
     const Ms   = mult(translate(0, -0.001, 0), Ms0);
     const MVPs = mult(P, mult(V, Ms));
